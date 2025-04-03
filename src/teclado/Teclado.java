@@ -173,12 +173,13 @@ public class Teclado {
 		JPanel sur = new JPanel();
 		sur.setBackground(new Color(240, 255, 255));
 		frame.getContentPane().add(sur, BorderLayout.SOUTH);
-		sur.setLayout(new BorderLayout(0, 0));
+		sur.setLayout(new GridLayout(1, 0, 1, 2));
 		
 		JLabel borrando = new JLabel("BORRANDO");
 		sur.add(borrando);
 		
 		JLabel espacio = new JLabel("ESPACIO");
+		espacio.setHorizontalAlignment(JLabel.RIGHT);
 		sur.add(espacio);
 	}
 
