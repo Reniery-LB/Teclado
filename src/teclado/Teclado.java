@@ -5,11 +5,17 @@ import java.awt.EventQueue;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
@@ -19,12 +25,44 @@ public class Teclado implements KeyListener{
 
 	private JFrame frame;
 	private JLabel[] teclas;
+	private JLabel esperando;
 	private char[] letras = {
 			'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
 	        'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ',
 	        'Z', 'X', 'C', 'V', 'B', 'N', 'M'
 	};
+	
+    private String[] palabras = {
+            "java", "programa", "teclado", "computadora", "desarrollo", 
+            "software", "hardware", "algoritmo", "variable", "funcion",
+            "clase", "objeto", "metodo", "herencia", "polimorfismo",
+            "interfaz", "abstracto", "paquete", "importar", "publico",
+            "privado", "protegido", "estatico", "final", "void",
+            "retorno", "cadena", "entero", "decimal", "booleano",
+            "verdadero", "falso", "nulo", "arreglo", "matriz",
+            "lista", "coleccion", "mapa", "conjunto", "iterador",
+            "bucle", "condicion", "switch", "caso", "defecto",
+            "excepcion", "error", "captura", "lanzar", "finally",
+            "hilo", "proceso", "sincronizacion", "concurrente", "paralelo",
+            "serial", "socket", "red", "protocolo", "http",
+            "html", "css", "javascript", "xml", "json",
+            "base", "datos", "consulta", "tabla", "registro",
+            "campo", "clave", "foranea", "primaria", "indice",
+            "transaccion", "commit", "rollback", "vista", "procedimiento",
+            "funcion", "disparador", "backup", "restore", "seguridad",
+            "usuario", "permiso", "rol", "auditoria", "encriptacion",
+            "hash", "token", "sesion", "cookie", "cache"
+        };
+    
+    private StringBuilder textoIngresado = new StringBuilder();
+    private JLabel escribir;
+    private JLabel time;
 	private JLabel teclaActual = null;
+	private int mil;
+	private int seg = 0;
+	Timer timer;
+	private boolean juegoIniciado = false;
+	private String palabraActual;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -33,13 +71,23 @@ public class Teclado implements KeyListener{
 					Teclado window = new Teclado();
 					window.frame.setVisible(true);
 					window.frame.addKeyListener(window);
+					String instrucciones = "INSTRUCCIONES:\n\n"
+				            + "1. Se mostrará una palabra aleatoria\n"
+				            + "2. Debes escribirla exactamente igual\n"
+				            + "3. El temporizador comenzará al primer caracter\n"
+				            + "4. Presiona ENTER cuando termines\n"
+				            + "5. Verás tu tiempo y una nueva palabra aparecerá\n\n"
+				            + "¡Buena suerte!";
+					
+					JOptionPane.showMessageDialog(window.frame, instrucciones,"Instrucciones del Juego", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
 	}
-
+	
+	
 	public Teclado() {
 		initialize();
 	}
@@ -58,14 +106,20 @@ public class Teclado implements KeyListener{
 		pnl_norte.setLayout(new GridLayout(2, 1, 0, 0));
 		pnl_norte.setBorder(BorderFactory.createLineBorder(Color.BLACK,4));
 		
-		JLabel esperando = new JLabel("Esperando");
-		esperando.setFont(new Font("Dialog", Font.BOLD, 18));
+		esperando = new JLabel("Esperando");
+		esperando.setFont(new Font("Dialog", Font.BOLD, 40));
 		esperando.setForeground(new Color(255, 255, 255));
 		pnl_norte.add(esperando);
 		
-		JLabel escribir = new JLabel("Palabra a escribir");
+		time = new JLabel("0:0");
+		time.setFont(new Font("Dialog", Font.BOLD, 40));
+		time.setForeground(new Color(255, 255, 255));
+		time.setHorizontalAlignment(JLabel.RIGHT);
+		pnl_norte.add(time);
+		
+		escribir = new JLabel();
 		escribir.setForeground(new Color(255, 255, 255));
-		escribir.setFont(new Font("Dialog", Font.PLAIN, 14));
+		escribir.setFont(new Font("Dialog", Font.PLAIN, 20));
 		pnl_norte.add(escribir);
 		
 		JPanel pnl_teclado = new JPanel();
@@ -78,119 +132,12 @@ public class Teclado implements KeyListener{
 		for (int i = 0; i < letras.length; i++) {
 			teclas[i] = new JLabel(String.valueOf(letras[i]));
 			teclas[i].setHorizontalAlignment(JLabel.CENTER);
+			teclas[i].setFont(new Font("Dialog", Font.BOLD, 14));
             teclas[i].setOpaque(true);
             teclas[i].setBackground(new Color(192,192,192));
             teclas[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
             pnl_teclado.add(teclas[i]);
 		}
-		
-//		JLabel tecla_q = new JLabel("Q");
-//		tecla_q.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_q);
-//		
-//		JLabel tecla_w = new JLabel("W");
-//		tecla_w.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_w);
-//		
-//		JLabel tecla_e = new JLabel("E");
-//		tecla_e.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_e);
-//		
-//		JLabel tecla_r = new JLabel("R");
-//		tecla_r.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_r);
-//		
-//		JLabel tecla_t = new JLabel("T");
-//		tecla_t.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_t);
-//		
-//		JLabel tecla_y = new JLabel("Y");
-//		tecla_y.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_y);
-//		
-//		JLabel tecla_u = new JLabel("U");
-//		tecla_u.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_u);
-//		
-//		JLabel tecla_i = new JLabel("I");
-//		tecla_i.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_i);
-//		
-//		JLabel tecla_o = new JLabel("O");
-//		tecla_o.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_o);
-//		
-//		JLabel tecla_p = new JLabel("P");
-//		tecla_p.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_p);
-//		
-//		JLabel tecla_a = new JLabel("A");
-//		tecla_a.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_a);
-//		
-//		JLabel tecla_s = new JLabel("S");
-//		tecla_s.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_s);
-//		
-//		JLabel tecla_d = new JLabel("D");
-//		tecla_d.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_d);
-//		
-//		JLabel tecla_f = new JLabel("F");
-//		tecla_f.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_f);
-//		
-//		JLabel tecla_g = new JLabel("G");
-//		tecla_g.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_g);
-//		
-//		JLabel tecla_h = new JLabel("H");
-//		tecla_h.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_h);
-//		
-//		JLabel tecla_j = new JLabel("J");
-//		tecla_j.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_j);
-//		
-//		JLabel tecla_k = new JLabel("K");
-//		tecla_k.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_k);
-//		
-//		JLabel tecla_l = new JLabel("L");
-//		tecla_l.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_l);
-//		
-//		JLabel tecla_ñ = new JLabel("Ñ");
-//		tecla_ñ.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_ñ);
-//		
-//		JLabel tecla_z = new JLabel("Z");
-//		tecla_z.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_z);
-//		
-//		JLabel tecla_x = new JLabel("X");
-//		tecla_x.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_x);
-//		
-//		JLabel tecla_c = new JLabel("C");
-//		tecla_c.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_c);
-//		
-//		JLabel tecla_v = new JLabel("V");
-//		tecla_v.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_v);
-//		
-//		JLabel tecla_b = new JLabel("B");
-//		tecla_b.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_b);
-//		
-//		JLabel tecla_n = new JLabel("N");
-//		tecla_n.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_n);
-//		
-//		JLabel tecla_m = new JLabel("M");
-//		tecla_m.setHorizontalAlignment(JLabel.CENTER);
-//		pnl_teclado.add(tecla_m);
 		
 		JPanel pnl_sur = new JPanel();
 		pnl_sur.setBackground(new Color(0, 0, 160));
@@ -200,15 +147,41 @@ public class Teclado implements KeyListener{
 		
 		JLabel borrando = new JLabel("BORRANDO");
 		borrando.setForeground(new Color(255, 255, 255));
-		borrando.setFont(new Font("Dialog", Font.BOLD, 18));
+		borrando.setFont(new Font("Dialog", Font.BOLD, 40));
 		borrando.setHorizontalAlignment(JLabel.CENTER);
 		pnl_sur.add(borrando);
 		
 		JLabel espacio = new JLabel("ESPACIO");
 		espacio.setForeground(new Color(255, 255, 255));
-		espacio.setFont(new Font("Dialog", Font.BOLD, 18));
+		espacio.setFont(new Font("Dialog", Font.BOLD, 40));
 		espacio.setHorizontalAlignment(JLabel.CENTER);
 		pnl_sur.add(espacio);
+		
+		Random randomNumbers = new Random();
+		String palabraAleatoria = palabras[randomNumbers.nextInt(palabras.length)];
+		escribir.setText("Palabra a escribir: " + palabraAleatoria);
+		
+			ActionListener taskPerfomer = new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					
+					String [] split_string = time.getText().split(":");
+					mil = Integer.parseInt(split_string[1]);
+					
+					mil +=1;
+					
+					if(mil >= 10) {
+						seg++;
+						mil = 1;
+					}
+					
+					time.setText(seg+":"+mil+"");
+				}
+			
+		};
+		timer = new Timer(100, taskPerfomer);
 	}
 	
 	private Color color_rand() {
@@ -224,12 +197,24 @@ public class Teclado implements KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+	    	   if(textoIngresado.length() > 0) {
+	    		   textoIngresado.deleteCharAt(textoIngresado.length() - 1);
+	    		   esperando.setText(textoIngresado.toString());
+	    	   }
+	    	   return;
+	     }
 		 char teclaPresionada = Character.toUpperCase(e.getKeyChar());
 		 
+		 timer.start();
+		 textoIngresado.append(e.getKeyChar());
+		 esperando.setText(textoIngresado.toString());
+		 	
 	       for (int i = 0; i < letras.length; i++) {
 	            if (letras[i] == teclaPresionada) {
 	                if (teclaActual != null) {
 	                    teclaActual.setBackground(new Color(192,192,192));
+	                    
 	                }
 	      
 	                teclaActual = teclas[i];
@@ -237,6 +222,22 @@ public class Teclado implements KeyListener{
 	                break;
 	            }
 	        }
+	       
+	       if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+	    	   timer.stop();
+				String tiempoFinal = seg + ":" +  mil;
+				JOptionPane.showMessageDialog(frame, 
+	                    "¡Palabra completada correctamente!\nTiempo: " + tiempoFinal + " segundos\n\nPresiona OK para la siguiente palabra", 
+	                    "¡Bien hecho!", JOptionPane.INFORMATION_MESSAGE);
+				
+				palabraActual = palabras[new Random().nextInt(palabras.length)];
+				escribir.setText("Palabra a escribir: " + palabraActual);
+				textoIngresado.setLength(0);
+				esperando.setText("Esperando");
+				time.setText("0:0");
+				seg = 0;
+				mil = 0;
+	       }
 	}
 
 	@Override
